@@ -1,0 +1,13 @@
+{
+    "project": "AICodeRisk",
+    "version": "V1",
+    "scope": {
+        "language": "python",
+        "focus": "security_vulnerabilities",
+        "output_format": "JSON",
+        "strict_output": true
+    },
+    "constraints": {
+        "no_expansion_until_release": true
+    }
+}

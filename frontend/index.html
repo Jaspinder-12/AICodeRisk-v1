@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AICodeRisk - V1</title>
+</head>
+
+<body>
+    <h1>AICodeRisk V1: Security Analyzer</h1>
+
+    <p>Input Python code below for security analysis:</p>
+    <textarea id="codeInput" rows="20" cols="80" placeholder="Paste Python code here..."></textarea>
+    <br>
+    <button id="analyzeBtn">Analyze</button>
+
+    <hr>
+    <h3>Results (JSON):</h3>
+    <pre id="resultsArea" style="background: #eee; padding: 10px; min-height: 50px;">Results will appear here...</pre>
+
+    <script>
+        document.getElementById('analyzeBtn').onclick = async () => {
+            const code = document.getElementById('codeInput').value;
+            const resultsArea = document.getElementById('resultsArea');
+
+            resultsArea.innerText = "Analyzing...";
+
+            try {
+                const response = await fetch('/analyze', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ code })
+                });
+
+                const data = await response.json();
+                resultsArea.innerText = JSON.stringify(data, null, 2);
+            } catch (err) {
+                resultsArea.innerText = "Error: " + err.message;
+            }
+        };
+    </script>
+</body>
+
+</html>
