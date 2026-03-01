@@ -53,7 +53,7 @@ def analyze_code(code_string):
     """
     Analyzes Python code for security vulnerabilities using Gemini as a strict engine.
     """
-    model = genai.GenerativeModel('gemini-1.5-flash')
+    model = genai.GenerativeModel("gemini-1.5-pro-latest")
     
     try:
         response = model.generate_content([SYSTEM_PROMPT, f"Code:\n{code_string}"])
