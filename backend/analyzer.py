@@ -69,13 +69,15 @@ def analyze_code(code_string):
         if not all(k in report for k in required_keys):
              raise ValueError("Missing keys in LLM response")
              
-        return report
+        return {
+            "status": "success",
+            **report
+        }
         
     except Exception as e:
         # Fallback if AI fails or returns invalid JSON
         return {
-            "risk_level": "Low",
-            "vulnerabilities": [],
-            "confidence_score": 0.0,
-            "error_internal": str(e)
+            "status": "analysis_error",
+            "message": str(e),
+            "confidence_score": 0.0
         }

@@ -5,26 +5,99 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>AICodeRisk - V1</title>
+    <style>
+        body {
+            font-family: sans-serif;
+            max-width: 800px;
+            margin: 40px auto;
+            padding: 0 20px;
+            line-height: 1.6;
+        }
+
+        textarea {
+            width: 100%;
+            font-family: monospace;
+            padding: 10px;
+            box-sizing: border-box;
+        }
+
+        button {
+            padding: 10px 20px;
+            cursor: pointer;
+            margin-right: 10px;
+        }
+
+        .result-container {
+            margin-top: 20px;
+            position: relative;
+        }
+
+        pre {
+            background: #f4f4f4;
+            padding: 15px;
+            border-radius: 5px;
+            overflow-x: auto;
+            white-space: pre-wrap;
+            word-wrap: break-word;
+        }
+
+        .error {
+            color: #d9534f;
+            font-weight: bold;
+            border-left: 5px solid #d9534f;
+            padding-left: 10px;
+        }
+
+        .success {
+            border-left: 5px solid #5cb85c;
+            padding-left: 10px;
+        }
+
+        #copyBtn {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            display: none;
+        }
+
+        #loading {
+            display: none;
+            color: #666;
+            font-style: italic;
+        }
+    </style>
 </head>
 
 <body>
     <h1>AICodeRisk V1: Security Analyzer</h1>
 
     <p>Input Python code below for security analysis:</p>
-    <textarea id="codeInput" rows="20" cols="80" placeholder="Paste Python code here..."></textarea>
-    <br>
-    <button id="analyzeBtn">Analyze</button>
+    <textarea id="codeInput" rows="15" placeholder="Paste Python code here..."></textarea>
+    <br><br>
+    <button id="analyzeBtn">Analyze Code</button>
+    <span id="loading">Analyzing... Please wait.</span>
 
-    <hr>
-    <h3>Results (JSON):</h3>
-    <pre id="resultsArea" style="background: #eee; padding: 10px; min-height: 50px;">Results will appear here...</pre>
+    <div class="result-container">
+        <button id="copyBtn">Copy JSON</button>
+        <h3>Results:</h3>
+        <pre id="resultsArea">Analysis results will appear here...</pre>
+    </div>
 
     <script>
-        document.getElementById('analyzeBtn').onclick = async () => {
-            const code = document.getElementById('codeInput').value;
-            const resultsArea = document.getElementById('resultsArea');
+        const analyzeBtn = document.getElementById('analyzeBtn');
+        const resultsArea = document.getElementById('resultsArea');
+        const loading = document.getElementById('loading');
+        const copyBtn = document.getElementById('copyBtn');
 
-            resultsArea.innerText = "Analyzing...";
+        analyzeBtn.onclick = async () => {
+            const code = document.getElementById('codeInput').value;
+            if (!code) return alert("Please provide some code first.");
+
+            analyzeBtn.disabled = true;
+            loading.style.display = "inline";
+            copyBtn.style.display = "none";
+            resultsArea.className = "";
+            resultsArea.innerText = "Processing...";
 
             try {
                 const response = await fetch('/analyze', {
@@ -35,9 +108,28 @@
 
                 const data = await response.json();
                 resultsArea.innerText = JSON.stringify(data, null, 2);
+
+                if (data.status === "analysis_error") {
+                    resultsArea.classList.add("error");
+                } else {
+                    resultsArea.classList.add("success");
+                    copyBtn.style.display = "block";
+                }
             } catch (err) {
                 resultsArea.innerText = "Error: " + err.message;
+                resultsArea.classList.add("error");
+            } finally {
+                analyzeBtn.disabled = false;
+                loading.style.display = "none";
             }
+        };
+
+        copyBtn.onclick = () => {
+            navigator.clipboard.writeText(resultsArea.innerText).then(() => {
+                const originalText = copyBtn.innerText;
+                copyBtn.innerText = "Copied!";
+                setTimeout(() => copyBtn.innerText = originalText, 2000);
+            });
         };
     </script>
 </body>

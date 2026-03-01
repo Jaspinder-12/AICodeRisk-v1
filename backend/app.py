@@ -18,9 +18,15 @@ def analyze():
         
     try:
         result = analyze_code(code)
+        if result.get("status") == "analysis_error":
+            return jsonify(result), 500
         return jsonify(result)
     except Exception as e:
-        return jsonify({"error": str(e)}), 500
+        return jsonify({
+            "status": "analysis_error",
+            "message": "Internal server error",
+            "confidence_score": 0.0
+        }), 500
 
 if __name__ == "__main__":
     port = int(os.environ.get("PORT", 5000))
