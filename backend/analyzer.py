@@ -1,9 +1,9 @@
 import os
 import json
-import google.generativeai as genai
+from google import genai
 
 # Setup API Key
-genai.configure(api_key="AIzaSyDaWTuZFCKUb74-Lg8DetOAAtU8Se22TzE")
+client = genai.Client(api_key="AIzaSyDaWTuZFCKUb74-Lg8DetOAAtU8Se22TzE")
 
 SYSTEM_PROMPT = """
 You are a security analysis engine.
@@ -52,11 +52,14 @@ Rules:
 def analyze_code(code_string):
     """
     Analyzes Python code for security vulnerabilities using Gemini as a strict engine.
+    Uses the new google.genai Client interface.
     """
-    model = genai.GenerativeModel("gemini-1.5-pro-latest")
-    
     try:
-        response = model.generate_content([SYSTEM_PROMPT, f"Code:\n{code_string}"])
+        response = client.models.generate_content(
+            model="gemini-1.5-pro-latest",
+            contents=[SYSTEM_PROMPT, f"Code:\n{code_string}"]
+        )
+        
         # Clean up response to ensure it's valid JSON
         text = response.text.replace('```json', '').replace('```', '').strip()
         report = json.loads(text)
@@ -74,5 +77,5 @@ def analyze_code(code_string):
             "risk_level": "Low",
             "vulnerabilities": [],
             "confidence_score": 0.0,
-            "error_internal": str(e) # This will be stripped or handled by the caller
+            "error_internal": str(e)
         }
