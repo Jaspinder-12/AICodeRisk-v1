@@ -3,7 +3,7 @@ import json
 from google import genai
 
 # Setup API Key
-client = genai.Client(api_key="AIzaSyDPShMmoXP4iKFdkNrMKiFIykyAZFjpJcI")
+client = genai.Client(api_key="AIzaSyDaWTuZFCKUb74-Lg8DetOAAtU8Se22TzE")
 
 SYSTEM_PROMPT = """
 You are a security analysis engine.
