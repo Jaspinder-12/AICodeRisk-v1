@@ -3,7 +3,7 @@ import json
 from google import genai
 
 # Setup API Key
-client = genai.Client(api_key="AIzaSyDaWTuZFCKUb74-Lg8DetOAAtU8Se22TzE")
+client = genai.Client(api_key="AIzaSyDPShMmoXP4iKFdkNrMKiFIykyAZFjpJcI")
 
 SYSTEM_PROMPT = """
 You are a security analysis engine.
@@ -56,7 +56,7 @@ def analyze_code(code_string):
     """
     try:
         response = client.models.generate_content(
-            model="gemini-1.5-pro-latest",
+            model="gemini-2.5-flash",
             contents=[SYSTEM_PROMPT, f"Code:\n{code_string}"]
         )
         
