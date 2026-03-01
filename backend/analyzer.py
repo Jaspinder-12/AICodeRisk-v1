@@ -3,7 +3,7 @@ import json
 import google.generativeai as genai
 
 # Setup API Key
-genai.configure(api_key=os.environ.get("GOOGLE_API_KEY", "YOUR_API_KEY_HERE"))
+genai.configure(api_key="AIzaSyDaWTuZFCKUb74-Lg8DetOAAtU8Se22TzE")
 
 SYSTEM_PROMPT = """
 You are a security analysis engine.
