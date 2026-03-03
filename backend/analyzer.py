@@ -2,8 +2,14 @@ import os
 import json
 from google import genai
 
-# Setup API Key
-client = genai.Client(api_key="AIzaSyDaWTuZFCKUb74-Lg8DetOAAtU8Se22TzE")
+# Setup API Key securely from environment
+api_key = os.getenv("GOOGLE_API_KEY")
+if not api_key:
+    # We define the client as None initially to avoid NameError if needed,
+    # but the analyze_code function handles the check.
+    client = None
+else:
+    client = genai.Client(api_key=api_key)
 
 SYSTEM_PROMPT = """
 You are a security analysis engine.
@@ -54,6 +60,13 @@ def analyze_code(code_string):
     Analyzes Python code for security vulnerabilities using Gemini as a strict engine.
     Uses the new google.genai Client interface.
     """
+    if not client:
+        return {
+            "status": "analysis_error",
+            "message": "GOOGLE_API_KEY is not set in the environment.",
+            "confidence_score": 0.0
+        }
+        
     try:
         response = client.models.generate_content(
             model="gemini-2.5-flash",
