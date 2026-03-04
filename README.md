@@ -1,23 +1,19 @@
-# AICodeRisk-v1
+# AICodeRisk
 
-Self-correcting and risk-aware AI coding project.
+A minimal tool that analyzes AI-generated Python code for common security vulnerabilities.
 
-## Directory Structure
+## Features
+- Detects SQL injection patterns
+- Flags unsafe eval/exec usage
+- Identifies command injection risks
+- Detects path traversal vulnerabilities
+- Returns structured risk report with severity and line numbers
 
-- `frontend/`: Web interface for code analysis.
-- `backend/`: Python server and security engine.
-- `docs/`: Critical documentation including CONTRACT.md.
-- `project_v1.json`: Version V1 scope and constraints.
+## Demo
+https://aicoderisk-v1.onrender.com/
 
-## Security & Setup
+## How it works
+Paste Python code → Analyzer checks for security risks → Returns JSON report.
 
-> [!IMPORTANT]
-> **Never commit API keys to this repository.** This project is configured to use environment variables for security.
-
-### Local Development
-1. Create a `.env` file (ignored by git).
-2. Add your key: `GOOGLE_API_KEY=your_key_here`
-3. Restrict access to your `.env` file.
-
-### Deployment (Render)
-Go to your Dashboard -> Environment and add the `GOOGLE_API_KEY` environment variable.
+## Disclaimer
+This is an experimental tool and not a full security scanner.
