@@ -5,7 +5,7 @@
 AICodeRisk analyses AI-generated Python code for security vulnerabilities.
 
 ## Live Demo
-[https://aicoderisk-v1.onrender.com/](https://aicoderisk-v1.onrender.com/)
+[https://aicoderisk.onrender.com/](https://aicoderisk-v1.onrender.com/)
 
 ## Features
 - **SQL injection detection**
