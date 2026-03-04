@@ -1,6 +1,10 @@
 from flask import Flask, request, jsonify, send_from_directory
 import os
+from dotenv import load_dotenv
 from analyzer import analyze_code
+
+# Load .env for local development
+load_dotenv()
 
 app = Flask(__name__, static_folder='../frontend')
 
