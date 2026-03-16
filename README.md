@@ -38,6 +38,13 @@ As AI-generated code becomes more prevalent, the risk of introducing subtle secu
 ## Project Status
 **Alpha**. This tool is in early development and should be used as a supplementary check, not a sole security measure.
 
+## AI Providers
+AICodeRisk supports multiple AI providers for explaining vulnerabilities:
+- **Gemini API** (Primary)
+- **Hugging Face Inference API** (Fallback)
+
+Hugging Face helps avoid rate-limit failures when quotas are exceeded.
+
 ## Local Development
 
 ### Prerequisites
@@ -47,9 +54,10 @@ As AI-generated code becomes more prevalent, the risk of introducing subtle secu
 ### Setup
 1. Clone the repository.
 2. Create a `.env` file in the root directory.
-3. Add your Gemini API key:
+3. Add your Gemini and Hugging Face API keys:
    ```env
-   GOOGLE_API_KEY=your_api_key_here
+   GOOGLE_API_KEY=your_gemini_api_key_here
+   HF_API_TOKEN=your_huggingface_token_here
    ```
 4. Install dependencies:
    ```bash

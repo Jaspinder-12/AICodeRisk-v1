@@ -4,6 +4,7 @@ import tempfile
 from typing import Dict, Any, List
 from google import genai
 from static_scanner import run_bandit_scan
+from ai_providers.huggingface_client import explain_vulnerabilities
 
 # Setup API Key securely from environment
 api_key = os.getenv("GOOGLE_API_KEY")
@@ -62,13 +63,6 @@ def analyze_code(code_string: str) -> Dict[str, Any]:
     Returns:
         A structured dictionary containing the analysis report.
     """
-    if not client:
-        return {
-            "status": "analysis_error",
-            "message": "GOOGLE_API_KEY is not set in the environment.",
-            "confidence_score": 0.0
-        }
-
     try:
         # Step 1: Write code to temporary file
         fd, temp_path = tempfile.mkstemp(suffix=".py", text=True)
@@ -105,34 +99,68 @@ def analyze_code(code_string: str) -> Dict[str, Any]:
         ```
         """
 
-        response = client.models.generate_content(
-            model="gemini-2.0-flash",
-            contents=[SYSTEM_PROMPT, prompt_content]
-        )
-        
-        # Clean up response to ensure it's valid JSON
-        text = response.text.replace('```json', '').replace('```', '').strip()
-        
-        try:
-            report = json.loads(text)
-        except json.JSONDecodeError:
-             return {
-                "status": "analysis_error",
-                "message": "Invalid model response"
-            }
-        
-        # Step 3: Strict JSON Validation
-        required_fields = ["risk_level", "vulnerabilities", "confidence_score"]
-        if not all(field in report for field in required_fields):
-             return {
-                "status": "analysis_error",
-                "message": "Invalid model response"
-            }
+        report = None
 
-        # Step 4: Merge Static Findings and Return Results
-        # Ensure static findings are included if the LLM missed them or for verification.
-        # Here we trust the LLM's merging if it followed instructions, but we can enforce it.
-        # For this implementation, we rely on the LLM to process findings and return the structured list.
+        # 1. Try Gemini First
+        if client:
+            try:
+                response = client.models.generate_content(
+                    model="gemini-2.0-flash",
+                    contents=[SYSTEM_PROMPT, prompt_content]
+                )
+                text = response.text.replace('```json', '').replace('```', '').strip()
+                # Attempt to extract JSON if it was wrapped in additional text
+                if '{' in text and '}' in text:
+                    text = text[text.find('{'):text.rfind('}')+1]
+                parsed = json.loads(text)
+                
+                required_fields = ["risk_level", "vulnerabilities", "confidence_score"]
+                if all(field in parsed for field in required_fields):
+                    report = parsed
+            except Exception:
+                pass # Trigger fallback
+
+        # 2. Try Hugging Face Fallback
+        if not report:
+            try:
+                hf_prompt = f"{SYSTEM_PROMPT}\n\n{prompt_content}"
+                hf_text = explain_vulnerabilities(hf_prompt)
+                hf_text = hf_text.replace('```json', '').replace('```', '').strip()
+                if '{' in hf_text and '}' in hf_text:
+                    hf_text = hf_text[hf_text.find('{'):hf_text.rfind('}')+1]
+                parsed = json.loads(hf_text)
+                
+                required_fields = ["risk_level", "vulnerabilities", "confidence_score"]
+                if all(field in parsed for field in required_fields):
+                    report = parsed
+            except Exception:
+                pass # Full failure
+
+        # 3. If both AI providers fail, return Bandit-only findings
+        if not report:
+            risk_level = "Low"
+            if any(v.get("issue_severity") in ["High", "Critical"] for v in static_vulnerabilities):
+                risk_level = "High"
+            elif any(v.get("issue_severity") == "Medium" for v in static_vulnerabilities):
+                risk_level = "Medium"
+
+            bandit_vulns = []
+            for v in static_vulnerabilities:
+                bandit_vulns.append({
+                    "type": v.get("test_name", "Bandit Finding"),
+                    "severity": v.get("issue_severity", "Medium"),
+                    "line_number": v.get("line_number", -1),
+                    "description": v.get("issue_text", "No description provided"),
+                    "fix_suggestion": "Manual review required"
+                })
+
+            return {
+                "status": "success",
+                "risk_level": risk_level,
+                "vulnerabilities": bandit_vulns,
+                "confidence_score": 0.5,
+                "note": "AI explanation unavailable"
+            }
 
         return {
             "status": "success",
